@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>CAVAGNOLA APP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0d6efd">
+  <style>
+    body { font-family: sans-serif; margin: 20px; background: #f8f9fa; color: #212529; }
+    h1 { color: #0d6efd; }
+    select, input, button {
+      margin: 10px 0;
+      display: block;
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+    }
+    #output {
+      margin-top: 20px;
+      font-weight: bold;
+      background: #e9ecef;
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>CAVAGNOLA APP</h1>
+
+  <label>Classe:</label>
+  <select id="classe">
+    <option value="Classe1">Classe1</option>
+    <option value="Classe2">Classe2</option>
+    <option value="Classe3">Classe3</option>
+    <option value="Classe4">Classe4</option>
+  </select>
+
+  <label>Tipo di valore:</label>
+  <select id="tipoValore">
+    <option value="cntr">Contenitori (CR)</option>
+    <option value="prezzo">Prezzo</option>
+  </select>
+
+  <label>Valore:</label>
+  <input type="number" id="valore" placeholder="Inserisci il valore">
+
+  <label>Ritardo?</label>
+  <select id="ritardo">
+    <option value="no">No</option>
+    <option value="si">Sì</option>
+  </select>
+
+  <div id="oreRitardoContainer" style="display:none;">
+    <label>Ore di ritardo:</label>
+    <input type="number" id="oreRitardo" placeholder="Inserisci ore di ritardo">
+  </div>
+
+  <button onclick="calcola()">Calcola</button>
+
+  <div id="output"></div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+
+    document.getElementById("ritardo").addEventListener("change", function () {
+      document.getElementById("oreRitardoContainer").style.display = this.value === "si" ? "block" : "none";
+    });
+
+    function calcola() {
+      const classe = document.getElementById("classe").value;
+      const tipo = document.getElementById("tipoValore").value;
+      let valore = parseFloat(document.getElementById("valore").value);
+      const ritardo = document.getElementById("ritardo").value;
+      const oreRitardo = ritardo === "si" ? parseInt(document.getElementById("oreRitardo").value || 0) : 0;
+
+      const dati = {
+        Classe1: [ { max: 100, prezzo: "€500", cntr: "20 SC" }, { max: 200, prezzo: "€900", cntr: "35 SC" } ],
+        Classe2: [ { max: 100, prezzo: "€600", cntr: "22 SC" }, { max: 200, prezzo: "€1000", cntr: "38 SC" } ],
+        Classe3: [ { max: 100, prezzo: "€700", cntr: "25 SC" }, { max: 200, prezzo: "€1100", cntr: "40 SC" } ],
+        Classe4: [ { max: 100, prezzo: "€800", cntr: "28 SC" }, { max: 200, prezzo: "€1200", cntr: "45 SC" } ]
+      };
+
+      if (tipo === "cntr" && oreRitardo > 0) {
+        valore += valore * 0.10 * oreRitardo;
+      }
+
+      const risultato = dati[classe].find(d => valore <= d.max);
+
+      const output = document.getElementById("output");
+      if (risultato) {
+        output.innerText = tipo === "cntr"
+          ? `Prezzo: ${risultato.prezzo} — Contenitori: ${risultato.cntr}`
+          : `Contenitori: ${risultato.cntr} — Prezzo: ${risultato.prezzo}`;
+      } else {
+        output.innerText = "Nessun risultato per questo valore.";
+      }
+    }
+  </script>
+</body>
+</html>
